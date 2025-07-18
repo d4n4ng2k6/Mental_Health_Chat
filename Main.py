@@ -14,7 +14,7 @@ load_dotenv()
 openai.api_base = os.getenv("OPENAI_API_BASE")  # from .env
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-ASRModel = WhisperModel('large',compute_type="int8")
+#ASRModel = WhisperModel('large',compute_type="int8")
 llm = ChatOpenAI(
     model="deepseek/deepseek-chat:free",  # Replace with a valid OpenRouter model
     temperature=0.3,
