@@ -7,6 +7,7 @@ import tempfile
 import json
 import os
 import re
+import uuid
 
 load_dotenv()
 
@@ -132,10 +133,16 @@ def chatbot(user_input, state):
   #      return "", f"Transcription error :{e}"
 
 def generate_tts(text):
-    tts = gTTS(text=text,lang="id")
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-        tts.save(fp.name)
-        return fp.name
+    output_dir = "audio"
+    os.makedirs(output_dir, exist_ok=True)
+
+    filename = f"{uuid.uuid4().hex}.mp3"
+    filepath = os.path.join(output_dir, filename)
+
+    tts = gTTS(text=text, lang="id")
+    tts.save(filepath)
+
+    return filepath
 #response = llm.invoke([
  #   HumanMessage(content="What is LLM Fine Tunning?")
 #])
