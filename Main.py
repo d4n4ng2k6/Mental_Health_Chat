@@ -174,4 +174,5 @@ with gr.Blocks() as demo:
     start_btn.click(fn=start,inputs=state,outputs=[response_box,audio_output,state])
     send_btn.click(fn=chat_wrapper,inputs=[user_answer, state],outputs=[response_box,audio_output, state])
     
-demo.launch()
+port = int(os.environ.get("PORT", 7860))
+demo.launch(server_name="0.0.0.0", server_port=port)
