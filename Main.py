@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import gradio as gr
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
-from faster_whisper import WhisperModel
+#from faster_whisper import WhisperModel
 from gtts import gTTS
 import tempfile
 import json
@@ -125,15 +125,15 @@ def chatbot(user_input, state):
     tts_path = generate_tts(response)
     return response,tts_path, {"index": index, "history": history, "clear_input":True}
 
-def transcribe(audio_path):
-    if audio_path == None:
-        return ""
-    try:
-        segments,_ = ASRModel.transcribe(audio_path,language="id")
-        text = " ".join(segment.text for segment in segments)
-        return text
-    except Exception as e:
-        return "", f"Transcription error :{e}"
+#def transcribe(audio_path):
+ #   if audio_path == None:
+  #      return ""
+  #  try:
+   #     segments,_ = ASRModel.transcribe(audio_path,language="id")
+   #     text = " ".join(segment.text for segment in segments)
+   #     return text
+   # except Exception as e:
+   #     return "", f"Transcription error :{e}"
 
 def generate_tts(text):
     tts = gTTS(text=text,lang="id")
