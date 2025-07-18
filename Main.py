@@ -1,25 +1,23 @@
-from dotenv import load_dotenv
 import gradio as gr
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
+from dotenv import load_dotenv
+from langchain_openai import OpenAI
 #from faster_whisper import WhisperModel
 from gtts import gTTS
 import tempfile
 import json
 import os
-import openai 
 import re
 
 load_dotenv()
-openai.api_base = os.getenv("OPENAI_API_BASE")  # from .env
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 #ASRModel = WhisperModel('large',compute_type="int8")
-llm = ChatOpenAI(
+llm = OpenAI(
     model="deepseek/deepseek-chat:free",  # Replace with a valid OpenRouter model
     temperature=0.3,
-    openai_api_base=os.getenv("OPENAI_API_BASE")
-)
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+    openai_api_base="https://openrouter.ai/api/v1",
+    )
 #print("API Key loaded:", repr(os.getenv("OPENAI_API_KEY")))
 #Load kuesioner DASS-21
 with open("DASS21.json","r") as f:
@@ -60,9 +58,7 @@ def clean_text(text):
 
 def beri_respon(pertanyaan,user_input):
     response_prompt = (
-        "Kamu adalah asisten konselor kesehatan mental bersertifikat. "
-        "Berdasarkan pernyataan dari kuesioner DASS dan jawaban seberapa sering dari pasien, "
-        "tuliskan pesan singkat dengan tanda baca yang jelas serta suportif dan berempati, dalam 1-2 kalimat.\n "
+        "Kamu adalah asisten konselor kesehatan mental bersertifikat. Berdasarkan pernyataan DASS dan jawaban seberapa sering dari pasien, tuliskan pesan singkat yang suportif dan berempati, dalam 1-2 kalimat.\n "
         f"Pernyataan: {pertanyaan}\n"
         f"Jawaban User: {user_input}\n"
         "Balasan:"
@@ -114,7 +110,7 @@ def chatbot(user_input, state):
     index+=1
    
     # Analyze result
-    if index>=len(dass_questions):
+    if index>len(dass_questions):
         summary = analyze_result()
         summary = clean_text(summary)
         final_response = f"{summary}"
@@ -127,13 +123,13 @@ def chatbot(user_input, state):
 
 #def transcribe(audio_path):
  #   if audio_path == None:
-  #      return ""
-  #  try:
-   #     segments,_ = ASRModel.transcribe(audio_path,language="id")
-   #     text = " ".join(segment.text for segment in segments)
-   #     return text
-   # except Exception as e:
-   #     return "", f"Transcription error :{e}"
+ #       return ""
+ #   try:
+ #       segments,_ = ASRModel.transcribe(audio_path,language="id")
+ #       text = " ".join(segment.text for segment in segments)
+ #       return text
+ #   except Exception as e:
+  #      return "", f"Transcription error :{e}"
 
 def generate_tts(text):
     tts = gTTS(text=text,lang="id")
@@ -144,7 +140,7 @@ def generate_tts(text):
  #   HumanMessage(content="What is LLM Fine Tunning?")
 #])
 
-with gr.Blocks() as app:
+with gr.Blocks() as demo:
     gr.Markdown("### Chatbot Online dengan Voice dan Teks")
     response_box = gr.TextArea(label="Respon Chat", interactive=False, lines= 10)
     audio_output = gr.Audio(label="Assistant Voice", interactive=False, autoplay=True,visible=False)
@@ -173,11 +169,9 @@ with gr.Blocks() as app:
         tts_path = generate_tts(intro_response)
         return intro_response ,tts_path, {"index": 0, "history": []}
 
-    app.load(trigger_intro, inputs=None, outputs=[response_box,audio_output, state])
+    demo.load(trigger_intro, inputs=None, outputs=[response_box,audio_output, state])
     #transcribe_btn.click(fn=transcribe,inputs=record_input,outputs=[text_input])
     start_btn.click(fn=start,inputs=state,outputs=[response_box,audio_output,state])
     send_btn.click(fn=chat_wrapper,inputs=[user_answer, state],outputs=[response_box,audio_output, state])
     
-app.launch(share=True)
-
-
+demo.launch()
